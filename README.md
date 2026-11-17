@@ -1,56 +1,22 @@
-# SOLMAR HEAT
+# makefun-gta6-01
 
 [![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![rank](https://make.fun/badge/gta6-01/kiki-zhq/makefun-gta6-01/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![reward](https://make.fun/badge/gta6-01/kiki-zhq/makefun-gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-An original open-world crime game in the fictional coastal city of Solmar, built for
-make.fun competition `gta6-01`. Everything in it — the city, characters, vehicles,
-names, story, art, sound and music — is original. No real city, gang, person or brand
-is depicted.
+**SOLMAR HEAT** — a complete open-world crime game in the spirit of GTA 6, playable offline in a desktop browser from static files. Explore the sun-soaked coastal city of Solmar on foot or by car: steal cars, outrun the Solmar PD under a 1–5 star wanted system, run a 5-mission story chain for Mara and Rico, fight rival gangs, and build your fortune. Three.js 3D city with traffic, pedestrians, police chases, a minimap HUD, synthesized WebAudio sound, and localStorage saves. Everything in it is original: the city, characters, vehicles, names, story, art, and sound.
 
-## Play
-
-Serve `game/` and open it in a desktop browser (no network needed, everything is
-local):
+## Run it
 
 ```sh
 node serve.ts
-# open http://localhost:8080
 ```
 
-You are **Jax Marlow**, fresh out of the Solmar docks. Your friend **Mara Voss** has
-five jobs for you: borrow a car, run a package, lose the cops, settle a score with
-the Vipers, and one last getaway down Ocean Drive.
+Then open http://localhost:8080 — no network request, no build step. Or open `game/index.html` through any static file server.
 
-- **On foot**: WASD to walk, Shift to run, Space to jump, drag the mouse to look.
-- **Cars**: press E near a parked car to borrow it; WASD to drive, Space is the
-  handbrake, E again to get out.
-- **Combat**: click or F to shoot, R to reload. Health packs (green crosses) heal you.
-- **Wanted**: stealing cars, hitting pedestrians and shooting raise your wanted
-  stars (1–5). Solmar PD cars chase and ram you; stay out of sight and the heat
-  fades, or press H to lay low.
-- **Missions**: follow the yellow beacon and the objective line; the minimap shows
-  you, traffic, police (blue) and the mission marker (yellow).
-- **Save**: pause with Esc to save (localStorage), restart a mission, or quit to title.
-- **Sound**: fully synthesized with WebAudio — engine hum, sirens, gunshots, a bass
-  loop. M mutes.
+**Controls:** WASD move / drive · Shift run · Space jump · E enter / exit car · Click / F shoot · R reload · M mute · Esc pause · drag mouse to look.
 
-## Tech
-
-- Three.js r160, vendored as a single `game/vendor/three.min.js`, loaded via import map.
-- Plain static files under `game/`; `game/index.html` is the entry point.
-- `main.ts` (Node 22, stdlib only) copies `game/` + `screenshots/` to `/output` and
-  writes `/output/dossier.json` via the vendored make.fun library.
-- Screenshots are staged deterministically with `?shot=title|driving|police|mission&seed=1`
-  (see `game/src/shots.js` and `shots.json`).
-- Round 2 polish: traffic cars pause at intersections, enemies keep a fighting
-  range and strafe while firing in bursts, and gunfire tracers linger in
-  screenshot mode so the mission shot shows the firefight.
-
-## License
-
-MIT — see `LICENSE`.
+**Missions:** 1) Borrowed Wheels — steal a car for Mara. 2) Hot Delivery — 90-second marina run. 3) Heat Check — reach 2 stars, then lose the cops. 4) Turf War — clear the Vipers' corner. 5) The Getaway — grab the cash and escape a 3-star chase.
 
 ---
 
