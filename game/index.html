@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SOLMAR HEAT — Open-World Crime Game</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1c2c; font-family: 'Segoe UI', Arial, sans-serif; }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #fff; user-select: none; }
+  #hud .panel { background: rgba(8, 20, 30, 0.62); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 6px 10px; }
+  #stats { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 6px; }
+  #stars { font-size: 22px; letter-spacing: 3px; color: #ffd23f; text-shadow: 0 0 6px #000; }
+  #stars .off { color: rgba(255,255,255,0.28); }
+  #healthbar { width: 190px; height: 12px; background: rgba(0,0,0,0.55); border-radius: 6px; overflow: hidden; }
+  #healthfill { height: 100%; width: 100%; background: linear-gradient(90deg, #37d67a, #a8e063); }
+  #money { font-size: 20px; font-weight: 700; color: #7dff9a; text-shadow: 0 1px 3px #000; }
+  #minimap { position: absolute; top: 12px; right: 12px; border: 2px solid rgba(255,255,255,0.35); border-radius: 50%; background: #0a2536; box-shadow: 0 0 14px rgba(0,0,0,0.6); }
+  #objective { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); max-width: 560px; text-align: center; font-size: 15px; line-height: 1.35; }
+  #objective b { color: #ffd23f; }
+  #speed { position: absolute; right: 16px; bottom: 14px; font-size: 30px; font-weight: 800; text-shadow: 0 2px 6px #000; text-align: right; }
+  #speed small { font-size: 13px; font-weight: 400; display: block; color: #cfe8ff; }
+  #hint { position: absolute; left: 12px; bottom: 12px; font-size: 12px; color: #dceeff; opacity: 0.85; line-height: 1.5; }
+  #toast { position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%); font-size: 19px; font-weight: 700; color: #ffe27a; text-shadow: 0 2px 6px #000; text-align: center; }
+  #crosshair { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; display: none; }
+  #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #fff; box-shadow: 0 0 3px #000; }
+  #crosshair::before { left: 10px; top: 0; width: 2px; height: 22px; }
+  #crosshair::after { left: 0; top: 10px; width: 22px; height: 2px; }
+  #vignette { position: absolute; inset: 0; box-shadow: inset 0 0 120px 40px rgba(200,0,0,0.55); opacity: 0; transition: opacity 0.3s; }
+  .overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(4, 12, 20, 0.55); z-index: 5; }
+  .card { background: linear-gradient(160deg, rgba(10,32,48,0.96), rgba(20,14,40,0.96)); border: 2px solid #ff9a3c; border-radius: 14px; padding: 26px 34px; max-width: 620px; color: #fff; text-align: center; box-shadow: 0 10px 60px rgba(0,0,0,0.7); }
+  .card h1 { margin: 0 0 2px; font-size: 52px; letter-spacing: 4px; color: #ffb347; text-shadow: 0 3px 0 #c22e00, 0 6px 18px rgba(0,0,0,0.8); font-style: italic; }
+  .card h2 { margin: 0 0 14px; font-size: 15px; letter-spacing: 6px; color: #7fd4ff; font-weight: 400; }
+  .card p { font-size: 14px; line-height: 1.55; color: #e8f2ff; text-align: left; }
+  .card .btn { display: inline-block; margin: 8px 6px 0; padding: 11px 26px; background: #ff7a1a; color: #fff; border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; pointer-events: auto; }
+  .card .btn.alt { background: #1c6fb8; }
+  .card .keys { font-size: 12.5px; color: #bcd8ee; text-align: left; column-count: 2; column-gap: 26px; }
+  .hidden { display: none !important; }
+  #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="SOLMAR HEAT: an open-world crime game in the fictional coastal city of Solmar"></canvas>
+<div id="hud">
+  <div id="stats">
+    <div id="stars" class="panel">☆☆☆☆☆</div>
+    <div class="panel"><div id="healthbar"><div id="healthfill"></div></div><div style="font-size:12px;margin-top:3px">♥ <span id="hptext">100</span> &nbsp;•&nbsp; 🔫 <span id="ammo">12</span> &nbsp;•&nbsp; <span id="armor">—</span></div></div>
+    <div id="money" class="panel">$ 0</div>
+  </div>
+  <canvas id="minimap" width="190" height="190"></canvas>
+  <div id="objective" class="panel hidden"><b id="objtitle">MISSION</b><br><span id="objtext"></span></div>
+  <div id="speed" class="hidden">0<small>km/h</small></div>
+  <div id="hint">WASD move &nbsp;•&nbsp; Shift run &nbsp;•&nbsp; Space jump &nbsp;•&nbsp; E enter / exit car &nbsp;•&nbsp; F shoot &nbsp;•&nbsp; M mute &nbsp;•&nbsp; Esc pause<br>Drag mouse to look around. Steal a car, follow the yellow marker, watch the stars.</div>
+  <div id="toast"></div>
+  <div id="crosshair"></div>
+  <div id="vignette"></div>
+</div>
+<div id="title" class="overlay">
+  <div class="card">
+    <h1>SOLMAR HEAT</h1>
+    <h2>A SUN-SOAKED OPEN WORLD &nbsp;•&nbsp; SOLMAR CITY</h2>
+    <p>You are <b>Jax Marlow</b>, fresh out of the Solmar docks with empty pockets and a fast mouth.
+    Your old friend <b>Mara Voss</b> has five jobs for you — borrow a car, run a package, lose the
+    cops, settle a score with the Vipers, and one last getaway down Ocean Drive. Steal cars, dodge
+    the Solmar PD, and don't get caught. The whole city is yours.</p>
+    <div class="keys">
+      <div>W A S D — walk / drive</div><div>Shift — run / boost</div>
+      <div>Space — jump / handbrake</div><div>E — enter / exit car</div>
+      <div>Mouse drag — look</div><div>Click / F — shoot</div>
+      <div>R — reload</div><div>M — mute</div>
+      <div>Esc — pause / missions</div><div>H — hide (lay low)</div>
+    </div>
+    <br>
+    <button class="btn" id="btnNew">▶ NEW GAME</button>
+    <button class="btn alt" id="btnContinue">CONTINUE</button>
+    <p style="text-align:center;font-size:11px;color:#9db8cc">An original game. All characters, places and art are fictional. No real city, gang or person is depicted.</p>
+  </div>
+</div>
+<div id="pause" class="overlay hidden">
+  <div class="card">
+    <h1 style="font-size:34px">PAUSED</h1>
+    <p id="missionlist" style="text-align:left"></p>
+    <button class="btn" id="btnResume">RESUME</button>
+    <button class="btn alt" id="btnRestart">RESTART MISSION</button>
+    <button class="btn alt" id="btnSave">SAVE GAME</button>
+    <button class="btn alt" id="btnTitle">QUIT TO TITLE</button>
+  </div>
+</div>
+<div id="dead" class="overlay hidden">
+  <div class="card">
+    <h1 style="font-size:40px;color:#ff5a5a">BUSTED / WASTED</h1>
+    <p id="deadtext" style="text-align:center">The Solmar PD hauled you in. Mara posts your bail — but it costs you.</p>
+    <button class="btn" id="btnRespawn">TRY AGAIN</button>
+    <button class="btn alt" id="btnDeadTitle">QUIT TO TITLE</button>
+  </div>
+</div>
+<p id="status" role="status" aria-live="polite"></p>
+<script type="importmap">{"imports": {"three": "./vendor/three.min.js"}}</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
